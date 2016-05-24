@@ -2,13 +2,13 @@ package agent.planningagent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 import environnement.Action;
 import environnement.Etat;
 import environnement.MDP;
-import environnement.gridworld.ActionGridworld;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Cet agent met a jour sa fonction de valeur avec value iteration et choisit
@@ -23,7 +23,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
      * discount facteur
      */
     protected double gamma;
-	//*** VOTRE CODE
+    protected HashMap<Etat, Double> values = new HashMap<>();
 
     /**
      *
@@ -33,13 +33,10 @@ public class ValueIterationAgent extends PlanningValueAgent {
     public ValueIterationAgent(double gamma, MDP mdp) {
         super(mdp);
         this.gamma = gamma;
-		//*** VOTRE CODE
-
     }
 
     public ValueIterationAgent(MDP mdp) {
         this(0.9, mdp);
-
     }
 
     /**
@@ -48,18 +45,34 @@ public class ValueIterationAgent extends PlanningValueAgent {
      */
     @Override
     public void updateV() {
-		//delta est utilise pour detecter la convergence de l'algorithme
-        //lorsque l'on planifie jusqu'a convergence, on arrete les iterations lorsque
-        //delta < epsilon 
-        this.delta = 0.0;
-		//*** VOTRE CODE
+        try {
+            this.delta = 0.0;
 
-		// mise a jour vmax et vmin pour affichage du gradient de couleur:
-        //vmax est la valeur de max pour tout s de V
-        //vmin est la valeur de min pour tout s de V
-        // ...
-        //******************* a laisser a la fin de la methode
-        this.notifyObs();
+            HashMap<Etat, Double> cloneValues = (HashMap<Etat, Double>) this.values.clone();
+            List<Etat> etats = this.mdp.getEtatsAccessibles();
+            for (Etat e : etats) {
+                List<Action> actions = this.mdp.getActionsPossibles(e);
+                Double maxA = null;
+                for (Action a : actions) {
+                    /*Map<Etat, Double> _etats = this.mdp.getEtatTransitionProba(e, a);
+                    double somme = 0;
+                    for (Etat _e : _etats.keySet()) {
+                        double T = _etats.get(_e);
+                        double R = this.mdp.getRecompense(e, a, _e);
+                        somme += T * (R + this.gamma * this.getValeur(_e));
+                    }*/
+                    double somme = this.getSomme(e, a);
+                    if (maxA == null || somme > maxA) {
+                        maxA = somme;
+                    }
+                }
+                cloneValues.put(e, maxA);
+            }
+            this.values.putAll(cloneValues);
+            this.notifyObs();
+        } catch (Exception e) {
+
+        }
     }
 
     /**
@@ -68,16 +81,17 @@ public class ValueIterationAgent extends PlanningValueAgent {
      */
     @Override
     public Action getAction(Etat e) {
-		//*** VOTRE CODE
-
-        return null;
+        List<Action> aPossibles = this.getPolitique(e);
+        if (aPossibles.size() == 0) {
+            return null;
+        }
+        int index = new Random().nextInt(aPossibles.size());
+        return aPossibles.get(index);
     }
 
     @Override
     public double getValeur(Etat _e) {
-		//*** VOTRE CODE
-
-        return 0.0;
+        return this.values.get(_e) == null ? 0 : this.values.get(_e);
     }
 
     /**
@@ -87,19 +101,51 @@ public class ValueIterationAgent extends PlanningValueAgent {
      */
     @Override
     public List<Action> getPolitique(Etat _e) {
-        List<Action> l = new ArrayList<Action>();
-		//*** VOTRE CODE
+        try {
+            List<Action> l = new ArrayList<>();
+            List<Action> aPossibles = this.mdp.getActionsPossibles(_e);
+            Double maxV = null;
+            for (Action a : aPossibles) {
+                /*Map<Etat, Double> etats = this.mdp.getEtatTransitionProba(_e, a);
+                double somme = 0;
+                for (Etat e : etats.keySet()) {
+                    double T = etats.get(e);
+                    double R = this.mdp.getRecompense(_e, a, e);
+                    somme += T * (R + this.gamma * this.getValeur(e));
+                }*/
+                double somme = this.getSomme(_e, a);
+                if (maxV == null) {
+                    maxV = somme;
+                    l.add(a);
+                } else if (somme > maxV) {
+                    maxV = somme;
+                    l.clear();
+                    l.add(a);
+                } else if (somme == maxV) {
+                    l.add(a);
+                }
+            }
+            return l;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
 
-        return l;
-
+    public double getSomme(Etat e, Action a) throws Exception {
+        Map<Etat, Double> etats = this.mdp.getEtatTransitionProba(e, a);
+        double somme = 0;
+        for (Etat _e : etats.keySet()) {
+            double T = etats.get(_e);
+            double R = this.mdp.getRecompense(e, a, _e);
+            somme += T * (R + this.gamma * this.getValeur(_e));
+        }
+        return somme;
     }
 
     @Override
     public void reset() {
         super.reset();
-		//*** VOTRE CODE
-
-        /*-----------------*/
         this.notifyObs();
 
     }
