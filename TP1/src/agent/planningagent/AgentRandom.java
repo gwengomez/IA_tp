@@ -5,6 +5,7 @@ import java.util.List;
 import environnement.Action;
 import environnement.Etat;
 import environnement.MDP;
+import java.util.Random;
 
 /**
  * Cet agent choisit une action aleatoire parmi toutes les autorisees dans
@@ -21,23 +22,21 @@ public class AgentRandom extends PlanningValueAgent {
 
     @Override
     public Action getAction(Etat e) {
-		//*** VOTRE CODE
-
-        return null;
-
+        List<Action> aPossibles = this.getPolitique(e);
+        if(aPossibles.size() == 0)
+            return null;
+        int index = new Random().nextInt(aPossibles.size());
+        return aPossibles.get(index);
     }
 
     @Override
     public double getValeur(Etat _e) {
-
         return 0.0;
     }
 
     @Override
     public List<Action> getPolitique(Etat _e) {
-		//*** VOTRE CODE
-
-        return null;
+        return this.mdp.getActionsPossibles(_e);
     }
 
     @Override
@@ -46,9 +45,6 @@ public class AgentRandom extends PlanningValueAgent {
     }
 
     @Override
-    public void setGamma(double parseDouble) {
-		// TODO Auto-generated method stub
-
-    }
+    public void setGamma(double parseDouble) {}
 
 }

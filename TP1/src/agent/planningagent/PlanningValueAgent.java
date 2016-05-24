@@ -31,11 +31,9 @@ public abstract class PlanningValueAgent extends ValueAgent implements IPlanning
      * Met a jour sa fonction de valeur en iterant sur nbIterations
      */
     public void run(int nbIterations) {
-
         for (int i = 0; i < nbIterations; i++) {
             this.updateV();
         }
-
     }
 
     /**
