@@ -92,9 +92,16 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public void setQValeur(Etat e, Action a, double d) {
-		//TODO
+        
+        if (tableQValeurs.get(e) == null) {
+            tableQValeurs.put(e, new HashMap<Action, Double>());
+        }
+        tableQValeurs.get(e).put(a, d);
+        
+        vmax = getValeur(e);
+        // vmin à faire 
 
-		//mise a jour vmin et vmax pour affichage gradient de couleur
+        //mise a jour vmin et vmax pour affichage gradient de couleur
         //...
         this.notifyObs();
     }
