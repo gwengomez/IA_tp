@@ -54,13 +54,6 @@ public class ValueIterationAgent extends PlanningValueAgent {
                 List<Action> actions = this.mdp.getActionsPossibles(e);
                 Double maxA = null;
                 for (Action a : actions) {
-                    /*Map<Etat, Double> _etats = this.mdp.getEtatTransitionProba(e, a);
-                    double somme = 0;
-                    for (Etat _e : _etats.keySet()) {
-                        double T = _etats.get(_e);
-                        double R = this.mdp.getRecompense(e, a, _e);
-                        somme += T * (R + this.gamma * this.getValeur(_e));
-                    }*/
                     double somme = this.getSomme(e, a);
                     if (maxA == null || somme > maxA) {
                         maxA = somme;
@@ -106,13 +99,6 @@ public class ValueIterationAgent extends PlanningValueAgent {
             List<Action> aPossibles = this.mdp.getActionsPossibles(_e);
             Double maxV = null;
             for (Action a : aPossibles) {
-                /*Map<Etat, Double> etats = this.mdp.getEtatTransitionProba(_e, a);
-                double somme = 0;
-                for (Etat e : etats.keySet()) {
-                    double T = etats.get(e);
-                    double R = this.mdp.getRecompense(_e, a, e);
-                    somme += T * (R + this.gamma * this.getValeur(e));
-                }*/
                 double somme = this.getSomme(_e, a);
                 if (maxV == null) {
                     maxV = somme;
@@ -146,6 +132,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     @Override
     public void reset() {
         super.reset();
+        this.values.clear();
         this.notifyObs();
 
     }
