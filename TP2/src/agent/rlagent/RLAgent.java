@@ -5,6 +5,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import agent.ValueAgent;
+import agent.ValueAgent;
 import agent.strategy.StrategyExploration;
 import agent.strategy.StrategyGreedy;
 import agent.strategy.StrategyManuel;
