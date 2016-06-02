@@ -144,7 +144,8 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public void endStep(Etat e, Action a, Etat esuivant, double reward) {
-		//TODO
+        double valeur = (1 - alpha)*getQValeur(e, a) + alpha*(reward + gamma*getValeur(e));
+	setQValeur(e, a, valeur);
 
     }
 
