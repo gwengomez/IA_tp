@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class QLearningAgent extends RLAgent {
 
-    private Map<Etat, Action> tableQValeurs;
+    private Map<Etat, Map<Action, Integer>> tableQValeurs;
     
     /**
      *
@@ -27,7 +27,7 @@ public class QLearningAgent extends RLAgent {
     public QLearningAgent(double alpha, double gamma,
             Environnement _env) {
         super(alpha, gamma, _env);
-	tableQValeurs = new HashMap<Etat, Action>();
+	tableQValeurs = new HashMap<Etat, Map<Action, Integer>>();
 
     }
 
@@ -39,8 +39,12 @@ public class QLearningAgent extends RLAgent {
     @Override
     public List<Action> getPolitique(Etat e) {
         int maxValeur = 0;
+        Map<Action, Integer> mapIntermediaire = new HashMap<>();
         for (Etat _e : tableQValeurs.keySet()) {
-            tableQValeurs.get(_e);
+            mapIntermediaire = tableQValeurs.get(_e);
+            for (Action _a : mapIntermediaire.keySet()) {
+                mapIntermediaire.get(_a);
+            }
         }
         return null;
 
