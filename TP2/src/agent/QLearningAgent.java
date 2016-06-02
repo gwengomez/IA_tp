@@ -38,15 +38,23 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public List<Action> getPolitique(Etat e) {
+        List<Action> actionsMaxValeur = new ArrayList<>();
         int maxValeur = 0;
         Map<Action, Integer> mapIntermediaire = new HashMap<>();
+        // Gerer etat absorbant
         for (Etat _e : tableQValeurs.keySet()) {
             mapIntermediaire = tableQValeurs.get(_e);
             for (Action _a : mapIntermediaire.keySet()) {
-                mapIntermediaire.get(_a);
+                if (mapIntermediaire.get(_a) > maxValeur) {
+                    actionsMaxValeur.clear();
+                    actionsMaxValeur.add(_a);
+                    maxValeur = mapIntermediaire.get(_a);
+                } else if (mapIntermediaire.get(_a) == maxValeur) {
+                    actionsMaxValeur.add(_a);
+                }
             }
         }
-        return null;
+        return actionsMaxValeur;
 
     }
 
