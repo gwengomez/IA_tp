@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class QLearningAgent extends RLAgent {
 
-    private Map<Etat, Map<Action, Integer>> tableQValeurs;
+    private Map<Etat, Map<Action, Double>> tableQValeurs;
     
     /**
      *
@@ -27,7 +27,7 @@ public class QLearningAgent extends RLAgent {
     public QLearningAgent(double alpha, double gamma,
             Environnement _env) {
         super(alpha, gamma, _env);
-	tableQValeurs = new HashMap<Etat, Map<Action, Integer>>();
+	tableQValeurs = new HashMap<Etat, Map<Action, Double>>();
 
     }
 
@@ -39,17 +39,15 @@ public class QLearningAgent extends RLAgent {
     @Override
     public List<Action> getPolitique(Etat e) {
         List<Action> actionsMaxValeur = new ArrayList<>();
-        int maxValeur = 0;
-        Map<Action, Integer> mapIntermediaire = new HashMap<>();
+        double maxValeur = 0;
         // Gerer etat absorbant
         for (Etat _e : tableQValeurs.keySet()) {
-            mapIntermediaire = tableQValeurs.get(_e);
-            for (Action _a : mapIntermediaire.keySet()) {
-                if (mapIntermediaire.get(_a) > maxValeur) {
+            for (Action _a : tableQValeurs.get(_e).keySet()) {
+                if (tableQValeurs.get(_e).get(_a) > maxValeur) {
+                    maxValeur = tableQValeurs.get(_e).get(_a);
                     actionsMaxValeur.clear();
                     actionsMaxValeur.add(_a);
-                    maxValeur = mapIntermediaire.get(_a);
-                } else if (mapIntermediaire.get(_a) == maxValeur) {
+                } else if (tableQValeurs.get(_e).get(_a) == maxValeur) {
                     actionsMaxValeur.add(_a);
                 }
             }
@@ -63,8 +61,15 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public double getValeur(Etat e) {
-        //TODO
-        return 0.0;
+        double maxValeur = 0;
+        for (Etat _e : tableQValeurs.keySet()) {
+            for (Action _a : tableQValeurs.get(_e).keySet()) {
+                if (tableQValeurs.get(_e).get(_a) > maxValeur) {
+                    maxValeur = tableQValeurs.get(_e).get(_a);
+                }
+            }
+        }
+        return maxValeur;
 
     }
 
@@ -76,8 +81,10 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public double getQValeur(Etat e, Action a) {
-        //TODO
-        return 0.0;
+        if (tableQValeurs.get(e) != null && tableQValeurs.get(e).get(a) != null) {
+            return tableQValeurs.get(e).get(a);
+        }
+        return 0;
     }
 
     /**
