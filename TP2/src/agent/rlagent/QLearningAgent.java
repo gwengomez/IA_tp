@@ -41,15 +41,13 @@ public class QLearningAgent extends RLAgent {
         List<Action> actionsMaxValeur = new ArrayList<>();
         double maxValeur = 0;
         // Gerer etat absorbant
-        for (Etat _e : tableQValeurs.keySet()) {
-            for (Action _a : tableQValeurs.get(_e).keySet()) {
-                if (tableQValeurs.get(_e).get(_a) > maxValeur) {
-                    maxValeur = tableQValeurs.get(_e).get(_a);
-                    actionsMaxValeur.clear();
-                    actionsMaxValeur.add(_a);
-                } else if (tableQValeurs.get(_e).get(_a) == maxValeur) {
-                    actionsMaxValeur.add(_a);
-                }
+        for (Action _a : tableQValeurs.get(e).keySet()) {
+            if (getQValeur(e, _a) > maxValeur) {
+                maxValeur = getQValeur(e, _a);
+                actionsMaxValeur.clear();
+                actionsMaxValeur.add(_a);
+            } else if (getQValeur(e, _a) == maxValeur) {
+                actionsMaxValeur.add(_a);
             }
         }
         return actionsMaxValeur;
@@ -61,15 +59,43 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public double getValeur(Etat e) {
-        double maxValeur = 0;
-        for (Etat _e : tableQValeurs.keySet()) {
-            for (Action _a : tableQValeurs.get(_e).keySet()) {
-                if (tableQValeurs.get(_e).get(_a) > maxValeur) {
-                    maxValeur = tableQValeurs.get(_e).get(_a);
-                }
+        Double maxValeur = null;
+        for (Action _a : tableQValeurs.get(e).keySet()) {
+            if (maxValeur == null || getQValeur(e, _a) > maxValeur) {
+                maxValeur = getQValeur(e, _a);
             }
         }
         return maxValeur;
+
+    }
+    
+    /**
+     * @return la valeur minimum d'un etat
+     */
+    public double getValeurMax() {
+        Double maxValeur = null;
+        for (Etat _e : tableQValeurs.keySet()) {
+            if (maxValeur == null || getValeur(_e) > maxValeur) {
+                maxValeur = getValeur(_e);
+            }
+        }
+        return maxValeur;
+
+    }
+    
+    /**
+     * @return la valeur minimum d'un etat
+     */
+    public double getValeurMin() {
+        Double minValeur = null;
+        for (Etat _e : tableQValeurs.keySet()) {
+            for (Action _a : tableQValeurs.get(_e).keySet()) {
+                if (minValeur == null || getQValeur(_e, _a) < minValeur) {
+                    minValeur = getQValeur(_e, _a);
+                }
+            }
+        }
+        return minValeur;
 
     }
 
@@ -99,10 +125,8 @@ public class QLearningAgent extends RLAgent {
         tableQValeurs.get(e).put(a, d);
         
         vmax = getValeur(e);
-        // vmin à faire 
+        vmin = getValeurMin();
 
-        //mise a jour vmin et vmax pour affichage gradient de couleur
-        //...
         this.notifyObs();
     }
 
