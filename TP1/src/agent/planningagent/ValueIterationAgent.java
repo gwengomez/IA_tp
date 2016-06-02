@@ -22,7 +22,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     /**
      * discount facteur
      */
-    protected double gamma;
+    protected double gamma; //pondéré plus ou moins l'importance donnée aux récompenses proches (gamma faible) ou aux récompenses faibles (gamma fort)
     protected HashMap<Etat, Double> values = new HashMap<>();
 
     /**
@@ -33,6 +33,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     public ValueIterationAgent(double gamma, MDP mdp) {
         super(mdp);
         this.gamma = gamma;
+        this.delta = 0.0;
     }
 
     public ValueIterationAgent(MDP mdp) {
@@ -46,8 +47,6 @@ public class ValueIterationAgent extends PlanningValueAgent {
     @Override
     public void updateV() {
         try {
-            this.delta = 0.0;
-
             HashMap<Etat, Double> cloneValues = (HashMap<Etat, Double>) this.values.clone();
             List<Etat> etats = this.mdp.getEtatsAccessibles();
             for (Etat e : etats) {
@@ -59,12 +58,25 @@ public class ValueIterationAgent extends PlanningValueAgent {
                         maxA = somme;
                     }
                 }
-                cloneValues.put(e, maxA);
+                if(maxA != null)
+                    cloneValues.put(e, maxA);
+            }
+            Double maxDelta = null;
+            for (Etat _e : this.values.keySet()) {
+                double diff = Math.abs(this.getValeur(_e) - cloneValues.get(_e));
+                if (maxDelta == null || diff > maxDelta) {
+                    maxDelta = diff;
+                }
+            }
+            if (maxDelta == null) {
+                this.delta = 0.0;
+            } else {
+                this.delta = maxDelta;
             }
             this.values.putAll(cloneValues);
             this.notifyObs();
         } catch (Exception e) {
-
+            System.out.println(e.getMessage());
         }
     }
 
