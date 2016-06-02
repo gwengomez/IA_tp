@@ -22,7 +22,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     /**
      * discount facteur
      */
-    protected double gamma;
+    protected double gamma; //pondéré plus ou moins l'importance donnée aux récompenses proches (gamma faible) ou aux récompenses faibles (gamma fort)
     protected HashMap<Etat, Double> values = new HashMap<>();
 
     /**
@@ -33,6 +33,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     public ValueIterationAgent(double gamma, MDP mdp) {
         super(mdp);
         this.gamma = gamma;
+        this.delta = 0.0;
     }
 
     public ValueIterationAgent(MDP mdp) {
@@ -46,32 +47,36 @@ public class ValueIterationAgent extends PlanningValueAgent {
     @Override
     public void updateV() {
         try {
-            this.delta = 0.0;
-
             HashMap<Etat, Double> cloneValues = (HashMap<Etat, Double>) this.values.clone();
             List<Etat> etats = this.mdp.getEtatsAccessibles();
             for (Etat e : etats) {
                 List<Action> actions = this.mdp.getActionsPossibles(e);
                 Double maxA = null;
                 for (Action a : actions) {
-                    /*Map<Etat, Double> _etats = this.mdp.getEtatTransitionProba(e, a);
-                    double somme = 0;
-                    for (Etat _e : _etats.keySet()) {
-                        double T = _etats.get(_e);
-                        double R = this.mdp.getRecompense(e, a, _e);
-                        somme += T * (R + this.gamma * this.getValeur(_e));
-                    }*/
                     double somme = this.getSomme(e, a);
                     if (maxA == null || somme > maxA) {
                         maxA = somme;
                     }
                 }
-                cloneValues.put(e, maxA);
+                if(maxA != null)
+                    cloneValues.put(e, maxA);
+            }
+            Double maxDelta = null;
+            for (Etat _e : this.values.keySet()) {
+                double diff = Math.abs(this.getValeur(_e) - cloneValues.get(_e));
+                if (maxDelta == null || diff > maxDelta) {
+                    maxDelta = diff;
+                }
+            }
+            if (maxDelta == null) {
+                this.delta = 0.0;
+            } else {
+                this.delta = maxDelta;
             }
             this.values.putAll(cloneValues);
             this.notifyObs();
         } catch (Exception e) {
-
+            System.out.println(e.getMessage());
         }
     }
 
@@ -106,13 +111,6 @@ public class ValueIterationAgent extends PlanningValueAgent {
             List<Action> aPossibles = this.mdp.getActionsPossibles(_e);
             Double maxV = null;
             for (Action a : aPossibles) {
-                /*Map<Etat, Double> etats = this.mdp.getEtatTransitionProba(_e, a);
-                double somme = 0;
-                for (Etat e : etats.keySet()) {
-                    double T = etats.get(e);
-                    double R = this.mdp.getRecompense(_e, a, e);
-                    somme += T * (R + this.gamma * this.getValeur(e));
-                }*/
                 double somme = this.getSomme(_e, a);
                 if (maxV == null) {
                     maxV = somme;
@@ -146,6 +144,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     @Override
     public void reset() {
         super.reset();
+        this.values.clear();
         this.notifyObs();
 
     }
