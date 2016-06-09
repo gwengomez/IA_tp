@@ -34,10 +34,18 @@ public class ValueIterationAgent extends PlanningValueAgent {
         super(mdp);
         this.gamma = gamma;
         this.delta = 0.0;
+        //initialisation de tous les états à zéro
+        initValues();
     }
 
     public ValueIterationAgent(MDP mdp) {
         this(0.9, mdp);
+    }
+
+    public void initValues() {
+        for (Etat e : this.mdp.getEtatsAccessibles()) {
+            this.values.put(e, null);
+        }
     }
 
     /**
@@ -47,7 +55,8 @@ public class ValueIterationAgent extends PlanningValueAgent {
     @Override
     public void updateV() {
         try {
-            HashMap<Etat, Double> cloneValues = (HashMap<Etat, Double>) this.values.clone();
+            HashMap<Etat, Double> cloneValues = new HashMap<>();/*(HashMap<Etat, Double>) this.values.clone();*/
+
             List<Etat> etats = this.mdp.getEtatsAccessibles();
             for (Etat e : etats) {
                 List<Action> actions = this.mdp.getActionsPossibles(e);
@@ -58,13 +67,14 @@ public class ValueIterationAgent extends PlanningValueAgent {
                         maxA = somme;
                     }
                 }
-                if(maxA != null)
+                if (maxA != null) {
                     cloneValues.put(e, maxA);
+                }
             }
             Double maxDelta = null;
             for (Etat _e : this.values.keySet()) {
-                double diff = Math.abs(this.getValeur(_e) - cloneValues.get(_e));
-                if (maxDelta == null || diff > maxDelta) {
+                double diff = Math.abs(this.getValeur(_e) - (cloneValues.get(_e) == null ? 0 : cloneValues.get(_e)));
+                if ((maxDelta == null || diff > maxDelta)) {
                     maxDelta = diff;
                 }
             }
@@ -112,10 +122,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
             Double maxV = null;
             for (Action a : aPossibles) {
                 double somme = this.getSomme(_e, a);
-                if (maxV == null) {
-                    maxV = somme;
-                    l.add(a);
-                } else if (somme > maxV) {
+                if (maxV == null || somme > maxV) {
                     maxV = somme;
                     l.clear();
                     l.add(a);
@@ -144,7 +151,7 @@ public class ValueIterationAgent extends PlanningValueAgent {
     @Override
     public void reset() {
         super.reset();
-        this.values.clear();
+        this.initValues();
         this.notifyObs();
 
     }
