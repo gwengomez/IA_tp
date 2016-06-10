@@ -40,14 +40,17 @@ public class QLearningAgent extends RLAgent {
     public List<Action> getPolitique(Etat e) {
         List<Action> actionsMaxValeur = new ArrayList<>();
         double maxValeur = 0;
-        // Gerer etat absorbant
-        for (Action _a : tableQValeurs.get(e).keySet()) {
-            if (getQValeur(e, _a) > maxValeur) {
-                maxValeur = getQValeur(e, _a);
-                actionsMaxValeur.clear();
-                actionsMaxValeur.add(_a);
-            } else if (getQValeur(e, _a) == maxValeur) {
-                actionsMaxValeur.add(_a);
+        if (!this.getActionsLegales(e).isEmpty()) {
+            if (tableQValeurs != null && tableQValeurs.get(e) != null) {
+                for (Action _a : tableQValeurs.get(e).keySet()) {
+                    if (getQValeur(e, _a) > maxValeur) {
+                        maxValeur = getQValeur(e, _a);
+                        actionsMaxValeur.clear();
+                        actionsMaxValeur.add(_a);
+                    } else if (getQValeur(e, _a) == maxValeur) {
+                        actionsMaxValeur.add(_a);
+                    }
+                }
             }
         }
         return actionsMaxValeur;
@@ -60,10 +63,15 @@ public class QLearningAgent extends RLAgent {
     @Override
     public double getValeur(Etat e) {
         Double maxValeur = null;
-        for (Action _a : tableQValeurs.get(e).keySet()) {
-            if (maxValeur == null || getQValeur(e, _a) > maxValeur) {
-                maxValeur = getQValeur(e, _a);
+        if (tableQValeurs != null && tableQValeurs.get(e) != null) {
+            for (Action _a : tableQValeurs.get(e).keySet()) {
+                if (maxValeur == null || getQValeur(e, _a) > maxValeur) {
+                    maxValeur = getQValeur(e, _a);
+                }
             }
+        }
+        if (maxValeur == null) {
+            maxValeur = 0.0;
         }
         return maxValeur;
 
@@ -74,10 +82,15 @@ public class QLearningAgent extends RLAgent {
      */
     public double getValeurMax() {
         Double maxValeur = null;
-        for (Etat _e : tableQValeurs.keySet()) {
-            if (maxValeur == null || getValeur(_e) > maxValeur) {
-                maxValeur = getValeur(_e);
+        if (tableQValeurs != null) {
+            for (Etat _e : tableQValeurs.keySet()) {
+                if (maxValeur == null || getValeur(_e) > maxValeur) {
+                    maxValeur = getValeur(_e);
+                }
             }
+        }
+        if (maxValeur == null) {
+            maxValeur = 0.0;
         }
         return maxValeur;
 
@@ -88,12 +101,17 @@ public class QLearningAgent extends RLAgent {
      */
     public double getValeurMin() {
         Double minValeur = null;
-        for (Etat _e : tableQValeurs.keySet()) {
-            for (Action _a : tableQValeurs.get(_e).keySet()) {
-                if (minValeur == null || getQValeur(_e, _a) < minValeur) {
-                    minValeur = getQValeur(_e, _a);
+        if (tableQValeurs != null) {
+            for (Etat _e : tableQValeurs.keySet()) {
+                for (Action _a : tableQValeurs.get(_e).keySet()) {
+                    if (minValeur == null || getQValeur(_e, _a) < minValeur) {
+                        minValeur = getQValeur(_e, _a);
+                    }
                 }
             }
+        }
+        if (minValeur == null) {
+            minValeur = 0.0;
         }
         return minValeur;
 
@@ -144,9 +162,8 @@ public class QLearningAgent extends RLAgent {
      */
     @Override
     public void endStep(Etat e, Action a, Etat esuivant, double reward) {
-        double valeur = (1 - alpha)*getQValeur(e, a) + alpha*(reward + gamma*getValeur(e));
+        double valeur = (1 - alpha)*getQValeur(e, a) + alpha*(reward + gamma*getValeur(esuivant));
 	setQValeur(e, a, valeur);
-
     }
 
     @Override
